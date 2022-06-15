@@ -11,106 +11,66 @@ public class ShoppingListUi {
 
     private static final String SAVED_SUCCESSFULLY = "Items saved successfully!";
     private static final String SHOPPING_LIST_TITLE = "Shopping List";
-    private static final int HEIGHT = 50;
-    private static String errorMessage;
-
-    private static Component alertComp;
-    private static final List<Item> shoppingListItems = new LinkedList<>();
+    private static final List<UiItem> shoppingListItems = new LinkedList<>();
     private static final JFrame shoppingListPage = new JFrame();
-    private static JTextField itemNameComp;
-    private static JTextField itemQuantityComp;
+    private static String errorMessage;
+    private static Component alertComp;
     private static int itemCount = 0;
+    private static final ShoppingListUiComponent uiComponent = new ShoppingListUiComponent();
     private static final ShoppingListService shopService =
             new ShoppingListServiceImpl(new MySQLShoppingListDAO());
 
     public static void main(String[] args) {
-        initItemComponent();
         loadComponentsToPage();
         initShoppingListPage();
         findAllItems();
     }
 
-    private static void initItemComponent() {
-        itemNameComp = itemNameTextInput();
-        itemQuantityComp = itemQuantityNumberInput();
-    }
-
     private static void loadComponentsToPage() {
-        Component[] components = {itemNameComp, quantityInpMinusBtn(), itemQuantityComp,
-                quantityPlusBtn(), addItemBtn(), saveBtn()};
+        Component[] components = {uiComponent.textInput(), uiComponent.quantityPlusBtn(), uiComponent.quantityInput(),
+                uiComponent.quantityMinusBtn(), addItemBtn(), saveBtn()};
 
         addComponentsToPage(components);
     }
 
     public static void addComponentsToPage(Component[] components) {
         for (Component component : components) {
-            shoppingListPage.add(component);
+            addComponentToPage(component);
         }
     }
 
-
-    private static JTextField itemNameTextInput() {
-        return getjTextField(50, 50, 300);
+    private static void findAllItems() {
+        List<Item> items = shopService.findAllItems();
+        for (Item item : items) {
+            incrementItemCount();
+            UiItem itemUi = createUiItemOfDbItems(item.getName(), String.valueOf(item.getQuantity()));
+            addItemToPage(itemUi);
+        }
     }
 
-    private static JTextField itemQuantityNumberInput() {
-        JTextField itemQuantity = getjTextField(410, 50, 65);
-        itemQuantityNumberInputConfig(itemQuantity);
-        return itemQuantity;
-    }
-
-    public static JTextField getjTextField(int x, int y, int width) {
-        JTextField itemName = new JTextField();
-        itemName.setBounds(x, y, width, HEIGHT);
-        itemName.setEditable(true);
-        return itemName;
-    }
-
-    private static void itemQuantityNumberInputConfig(JTextField itemQuantity) {
-        itemQuantity.setText("0");
-        itemQuantity.setHorizontalAlignment(JTextField.CENTER);
-    }
-
-    private static JButton quantityInpMinusBtn() {
-        JButton button = getButton("-", 365, 50, 40, 10);
-        button.addActionListener(e -> itemQuantityComp.setText(decrementQuantity()));
-        return button;
-    }
-
-    private static String decrementQuantity() {
-        return String.valueOf(Integer.parseInt(itemQuantityComp.getText()) - 1);
-    }
-
-    private static JButton quantityPlusBtn() {
-        JButton button = getButton("+", 480, 50, 40, 10);
-        button.addActionListener(e -> itemQuantityComp.setText(incrementQuantity()));
-        return button;
-    }
-
-    private static String incrementQuantity() {
-        return String.valueOf(Integer.parseInt(itemQuantityComp.getText()) + 1);
+    private static UiItem createUiItemOfDbItems(String name, String quantity) {
+        return createItemUiComponent(name, quantity);
     }
 
     private static JButton addItemBtn() {
-        JButton addBtn = getButton("Add", 300, 120, 150, 15);
+        JButton addBtn = uiComponent.addBtn();
         addItemBtnAction(addBtn);
         return addBtn;
     }
 
     private static void addItemBtnAction(JButton addBtn) {
         addBtn.addActionListener(e -> {
-            if (!isValidItems()) {
+            if (!isValidItem()) {
                 throwAlert(Alert.error(errorMessage));
             } else {
                 clearAlert();
                 incrementItemCount();
-                Item item = createUiItemOfClientItem(getTopMargin());
+                UiItem item = createUiItemOfClientItem();
                 addItemToPage(item);
                 clearItemsInput();
             }
         });
     }
-
 
     private static void incrementItemCount() {
         itemCount++;
@@ -128,63 +88,74 @@ public class ShoppingListUi {
         return itemCount == 1;
     }
 
-    private static Item createUiItemOfClientItem(int topMargin) {
-        return createItemUiComponent(itemNameComp.getText(), itemQuantityComp.getText(), topMargin);
+    private static UiItem createUiItemOfClientItem() {
+        return createItemUiComponent(getItemName(), getItemQuantity());
     }
 
-    private static boolean isValidItems() {
+    private static boolean isValidItem() {
         boolean isValidItems = true;
-        int quantity = Integer.parseInt(itemQuantityComp.getText());
-        String itemName = itemNameComp.getText();
-
-        if (itemName == null || itemName.isEmpty()) {
+        if (isItemNameNullOrEmpty(getItemName())) {
             isValidItems = false;
-            errorMessage = "Please Enter the Item name.";
-        } else if (quantity < 1 || quantity > 100) {
+            setFailMessage("Please Enter the Item name.");
+        } else if (isItemQuantityBetween(1, 100)) {
             isValidItems = false;
-            errorMessage = "item quantity should have between 1 and 100";
+            setFailMessage("item quantity should have between 1 and 100");
         }
-
         return isValidItems;
     }
 
-    private static Item createItemUiComponent(String name, String quantity, int topMargin) {
-        Item itemUi = new Item(name, quantity, topMargin);
+    private static String getItemName() {
+        return uiComponent.getItemName();
+    }
+
+    private static boolean isItemQuantityBetween(int min, int max) {
+        int quantity = Integer.parseInt(getItemQuantity());
+        return quantity < min || quantity > max;
+    }
+
+    private static String getItemQuantity() {
+        return uiComponent.getItemQuantity();
+    }
+
+    private static boolean isItemNameNullOrEmpty(String itemName) {
+        return itemName == null || itemName.isEmpty();
+    }
+
+    private static void setFailMessage(String failMessage) {
+        errorMessage = failMessage;
+    }
+
+    private static UiItem createItemUiComponent(String name, String quantity) {
+        UiItem itemUi = new UiItem(name, quantity, getTopMargin());
         itemUi.createItemComponent();
         return itemUi;
     }
 
-    private static void addItemToPage(Item itemUi) {
+    private static void addItemToPage(UiItem itemUi) {
         shoppingListItems.add(itemUi);
-        for (Item item : shoppingListItems) {
+        for (UiItem item : shoppingListItems) {
             addItemToShoppingList(item);
-            attachDeleteBtnToItem(item);
+            attachDeleteBtnToItem(itemUi);
         }
     }
 
-    private static void attachDeleteBtnToItem(Item item) {
-        shoppingListPage.add(deleteBtn(item));
+    private static void attachDeleteBtnToItem(UiItem item) {
+        addComponentToPage(deleteBtn(item));
     }
 
-    private static void addItemToShoppingList(Item item) {
-        shoppingListPage.add(item.getNameComponent());
-        shoppingListPage.add(item.getQuantityComponent());
+    private static void addItemToShoppingList(UiItem item) {
+        addComponentToPage(item.getNameComponent());
+        addComponentToPage(item.getQuantityComponent());
         shoppingListPage.repaint();
     }
 
-    private static JButton deleteBtn(Item item) {
-        JButton button = getButton("X", 500, item.getTopMargin(), 50, 15);
-        deleteBtnUiConfig(button);
+    private static JButton deleteBtn(UiItem item) {
+        JButton button = uiComponent.deleteBtn(item.getTopMargin());
         deleteBtnAction(item, button);
         return button;
     }
 
-    private static void deleteBtnUiConfig(JButton button) {
-        button.setBackground(Color.BLACK);
-        button.setForeground(Color.WHITE);
-    }
-
-    private static void deleteBtnAction(Item item, JButton button) {
+    private static void deleteBtnAction(UiItem item, JButton button) {
         button.addActionListener(e1 -> {
             shoppingListItems.remove(item);
             removeItemOfShoppingListPage(item);
@@ -193,7 +164,7 @@ public class ShoppingListUi {
         });
     }
 
-    private static void removeItemOfShoppingListPage(Item item) {
+    private static void removeItemOfShoppingListPage(UiItem item) {
         removeComponent(item.getQuantityComponent());
         removeComponent(item.getNameComponent());
     }
@@ -209,20 +180,13 @@ public class ShoppingListUi {
     }
 
     private static void clearItemsInput() {
-        itemNameComp.setText("");
-        itemQuantityComp.setText("0");
+        uiComponent.setInputName("");
+        uiComponent.setInputQuantity("0");
     }
 
     private static JButton saveBtn() {
-        JButton saveBtn = getButton("Save", 100, 120, 150, 15);
+        JButton saveBtn = uiComponent.saveBtn();
         saveBtn.addActionListener(e -> saveItems());
-        return saveBtn;
-    }
-
-    private static JButton getButton(String text, int x, int y, int width, int textSize) {
-        JButton saveBtn = new JButton(text);
-        saveBtn.setBounds(x, y, width, HEIGHT);
-        saveBtn.setFont(new Font("Arial", Font.PLAIN, textSize));
         return saveBtn;
     }
 
@@ -235,10 +199,10 @@ public class ShoppingListUi {
         }
     }
 
-    private static List<shop.Item> getItems() {
-        List<shop.Item> items = new LinkedList<>();
-        for (Item component : shoppingListItems) {
-            items.add(new shop.Item(component.getName(), component.getQuantity()));
+    private static List<Item> getItems() {
+        List<Item> items = new LinkedList<>();
+        for (UiItem component : shoppingListItems) {
+            items.add(new Item(component.getName(), component.getQuantity()));
         }
         return items;
     }
@@ -246,6 +210,10 @@ public class ShoppingListUi {
     private static void throwAlert(Component alert) {
         clearAlert();
         alertComp = alert;
+        addComponentToPage(alert);
+    }
+
+    private static void addComponentToPage(Component alert) {
         shoppingListPage.add(alert);
     }
 
@@ -261,18 +229,4 @@ public class ShoppingListUi {
         shoppingListPage.setVisible(true);
     }
 
-    private static void findAllItems() {
-        List<shop.Item> items = shopService.findAllItems();
-        for (shop.Item item : items) {
-            incrementItemCount();
-            int topMargin = getTopMargin();
-            Item itemUi = createItemUiComponentOfDatabaseItems(item.getName(), String.valueOf(item.getQuantity()), topMargin);
-            shoppingListItems.add(itemUi);
-            addItemToPage(itemUi);
-        }
-    }
-
-    private static Item createItemUiComponentOfDatabaseItems(String name, String quantity, int topMargin) {
-        return createItemUiComponent(name, quantity, topMargin);
-    }
 }

@@ -13,7 +13,6 @@ public class ShoppingListServiceImpl implements ShoppingListService{
 
     @Override
     public List<Item> findAllItems() {
-        // Get all items from database : Any logic
         return shoppingListDAO.findAllItems();
     }
 
@@ -22,7 +21,6 @@ public class ShoppingListServiceImpl implements ShoppingListService{
         for (Item item : items) {
             item.check();
         }
-        // save all items
         shoppingListDAO.saveItems(items);
     }
 }
