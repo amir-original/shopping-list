@@ -16,7 +16,7 @@ import static java.sql.DriverManager.getConnection;
 public class MySQLShoppingListDAO implements ShoppingListDAO {
 
     private static final String INSERT_SQL = "INSERT INTO item(name, quantity) VALUES(?,?)";
-    private static final String SELECT_SQL = "SELECT * FROM item ORDER By id DESC LIMIT 10";
+    private static final String SELECT_SQL = "SELECT * FROM item ORDER By id ASC LIMIT 10";
     private static final String TRUNCATE_SQL = "TRUNCATE TABLE item";
     private String host;
     private String user;

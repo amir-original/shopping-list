@@ -39,7 +39,7 @@ public class Alert {
     public static JTextField getjTextField(int x, int y, int width) {
         JTextField itemName = new JTextField();
         itemName.setBounds(x, y, width, 50);
-        itemName.setEditable(true);
         return itemName;
     }
+
 }

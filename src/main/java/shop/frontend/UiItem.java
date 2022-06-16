@@ -62,6 +62,10 @@ public class UiItem {
         return Integer.parseInt(quantity);
     }
 
+    public String getStrQuantity() {
+        return quantity;
+    }
+
     public int getTopMargin() {
         return topMargin;
     }

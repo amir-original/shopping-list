@@ -1,7 +1,5 @@
 package shop.frontend;
 
-import com.sun.xml.internal.fastinfoset.stax.events.CommentEvent;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,7 +9,7 @@ public class ShoppingListUiComponent {
     private JTextField name;
     private JTextField quantity;
 
-    public JTextField textInput() {
+    public JTextField nameInput() {
         return name = getjTextField(50, 50, 300);
     }
 
@@ -47,12 +45,6 @@ public class ShoppingListUiComponent {
         return jTextField;
     }
 
-    private static JTextField itemQuantityNumberInput() {
-        JTextField itemQuantity = getjTextField(410, 50, 65);
-        itemQuantityNumberInputConfig(itemQuantity);
-        return itemQuantity;
-    }
-
     private static void itemQuantityNumberInputConfig(JTextField itemQuantity) {
         itemQuantity.setText("0");
         itemQuantity.setHorizontalAlignment(JTextField.CENTER);
@@ -71,11 +63,15 @@ public class ShoppingListUiComponent {
     }
 
     private String decrementQuantity() {
-        return String.valueOf(Integer.parseInt(quantity.getText()) - 1);
+        return convertToString(getIntItemQuantity() - 1);
     }
 
     private String incrementQuantity() {
-        return String.valueOf(Integer.parseInt(quantity.getText()) + 1);
+        return convertToString(getIntItemQuantity() + 1);
+    }
+
+    private String convertToString(int i) {
+        return String.valueOf(i);
     }
 
     private static JButton getButton(String text, int x, int y, int width, int textSize) {
@@ -93,16 +89,16 @@ public class ShoppingListUiComponent {
         return quantity.getText();
     }
 
-    public JTextField getInputQuantity() {
-        return quantity;
+    public int getIntItemQuantity() {
+        return convertToInt(getItemQuantity());
     }
 
-    public JTextField getInputName() {
-        return name;
+    private int convertToInt(String str) {
+        return Integer.parseInt(str);
     }
 
     public void setInputName(String text) {
-        quantity.setText(text);
+        name.setText(text);
     }
 
     public void setInputQuantity(String text) {

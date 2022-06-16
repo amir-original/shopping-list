@@ -24,4 +24,12 @@ public class Item {
     public int getQuantity() {
         return quantity;
     }
+
+    public String getStrQuantity() {
+        return convertToString(quantity);
+    }
+
+    private String convertToString(int in) {
+        return String.valueOf(in);
+    }
 }
