@@ -9,6 +9,8 @@ import java.util.List;
 
 public class ShoppingListUi {
 
+    private static final int WIDTH = 600;
+    private static final int HEIGHT = 600;
     private static final String SHOPPING_LIST_TITLE = "Shopping List";
     private static final String FAIL_ITEM_NAME_MESSAGE = "Please Enter the Item name.";
     private static final String SAVED_SUCCESSFULLY = "Items saved successfully!";
@@ -43,7 +45,7 @@ public class ShoppingListUi {
 
     private static void initShoppingListPage() {
         shoppingListPage.setTitle(SHOPPING_LIST_TITLE);
-        shoppingListPage.setSize(600, 600);
+        shoppingListPage.setSize(WIDTH, HEIGHT);
         shoppingListPage.setLayout(null);
         shoppingListPage.setVisible(true);
     }
@@ -52,7 +54,7 @@ public class ShoppingListUi {
         List<Item> items = shopService.findAllItems();
         for (Item item : items) {
             incrementItemCount();
-            UiItem itemUi = createUiItemOfDbItems(item.getName(), item.getStrQuantity());
+            UiItem itemUi = createItemUiComponent(item.getName(), item.getStrQuantity());
             addItemToShoppingListItems(itemUi);
             addItemsToPage();
         }
@@ -60,10 +62,6 @@ public class ShoppingListUi {
 
     private static void addItemToShoppingListItems(UiItem itemUi) {
         shoppingListItems.add(itemUi);
-    }
-
-    private static UiItem createUiItemOfDbItems(String name, String quantity) {
-        return createItemUiComponent(name, quantity);
     }
 
     private static JButton addItemBtn() {
@@ -83,7 +81,7 @@ public class ShoppingListUi {
 
     private static void refreshPageWhenClickAddBtn() {
         incrementItemCount();
-        UiItem item = createUiItemOfClientItem();
+        UiItem item = createItemUiComponent(getItemName(), uiComponent.getItemQuantity());
         addItemToShoppingListItems(item);
         addItemsToPage();
         clearAlertAndItemsInput();
@@ -115,7 +113,7 @@ public class ShoppingListUi {
     }
 
     private static boolean isItemQuantityBetween(int min, int max) {
-        int quantity = getIntItemQuantity();
+        int quantity = uiComponent.getIntItemQuantity();
         return quantity < min || quantity > max;
     }
 
@@ -139,22 +137,8 @@ public class ShoppingListUi {
         return itemCount == 1;
     }
 
-    private static UiItem createUiItemOfClientItem() {
-        return createItemUiComponent(getItemName(), getStrItemQuantity());
-    }
-
-    private static String getStrItemQuantity() {
-        return uiComponent.getItemQuantity();
-    }
-
-    private static Integer getIntItemQuantity() {
-        return uiComponent.getIntItemQuantity();
-    }
-
     private static UiItem createItemUiComponent(String name, String quantity) {
-        UiItem itemUi = new UiItem(name, quantity, getTopMargin());
-        itemUi.createItemComponent();
-        return itemUi;
+        return new UiItem(name, quantity, getTopMargin());
     }
 
     private static void addItemsToPage() {
@@ -167,7 +151,6 @@ public class ShoppingListUi {
     private static void addItemToShoppingList(UiItem item) {
         addComponentToPage(item.getNameComponent());
         addComponentToPage(item.getQuantityComponent());
-        shoppingListPage.repaint();
     }
 
     private static void attachDeleteBtnToItem(UiItem item) {
@@ -176,15 +159,16 @@ public class ShoppingListUi {
 
     private static void addComponentToPage(Component component) {
         shoppingListPage.add(component);
+        shoppingListPage.repaint();
     }
 
     private static JButton deleteBtn(UiItem item) {
         JButton button = uiComponent.deleteBtn(item.getTopMargin());
-        deleteBtnAction(item, button);
+        addActionToDeleteBtn(item, button);
         return button;
     }
 
-    private static void deleteBtnAction(UiItem item, JButton button) {
+    private static void addActionToDeleteBtn(UiItem item, JButton button) {
         button.addActionListener(e1 -> {
             shoppingListItems.remove(item);
             removeItemOfShoppingListPage(item);
@@ -213,8 +197,7 @@ public class ShoppingListUi {
 
     private static void removeDeleteBtn(Component component) {
         if (isThisComponentBtn(component)) {
-            JButton btn = (JButton) component;
-            if (isDeleteBtn(btn))
+            if (isDeleteBtn((JButton) component))
                 removeComponent(component);
         }
     }
@@ -287,8 +270,8 @@ public class ShoppingListUi {
 
     private static List<Item> getItems() {
         List<Item> items = new LinkedList<>();
-        for (UiItem component : shoppingListItems) {
-            items.add(new Item(component.getName(), component.getQuantity()));
+        for (UiItem uiItem : shoppingListItems) {
+            items.add(new Item(uiItem.getName(), uiItem.getQuantity()));
         }
         return items;
     }

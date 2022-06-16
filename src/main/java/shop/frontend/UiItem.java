@@ -18,6 +18,7 @@ public class UiItem {
         this.name = name;
         this.quantity = quantity;
         this.topMargin = topMargin;
+        createItemComponent();
     }
 
     public void createItemComponent() {
