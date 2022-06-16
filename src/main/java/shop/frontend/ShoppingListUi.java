@@ -12,7 +12,7 @@ public class ShoppingListUi {
     private static final String SHOPPING_LIST_TITLE = "Shopping List";
     private static final String FAIL_ITEM_NAME_MESSAGE = "Please Enter the Item name.";
     private static final String SAVED_SUCCESSFULLY = "Items saved successfully!";
-    private static final String FAIL_ITEM_QUANTITY_MESSAGE = "item quantity should have between 1 and 100";
+    private static final String FAIL_ITEM_QUANTITY_MESSAGE = "item quantity should between 1 and 100";
     private static final JFrame shoppingListPage = new JFrame();
     private static final ShoppingListUiComponent uiComponent = new ShoppingListUiComponent();
     private static final ShoppingListService shopService = new ShoppingListServiceImpl(new MySQLShoppingListDAO());
