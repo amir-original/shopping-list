@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Alert {
+    public static String alert;
 
     public static JTextField success(String text){
         JTextField successJText = getjTextField(60, 0, 600);

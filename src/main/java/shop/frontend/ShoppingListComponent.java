@@ -3,11 +3,12 @@ package shop.frontend;
 import javax.swing.*;
 import java.awt.*;
 
-public class ShoppingListUiComponent {
+public class ShoppingListComponent {
 
     private static final int HEIGHT = 50;
     private JTextField name;
     private JTextField quantity;
+    private String errorMessage;
 
     public JTextField nameInput() {
         return name = getjTextField(50, 50, 300);
@@ -56,22 +57,16 @@ public class ShoppingListUiComponent {
         return button;
     }
 
+    private String incrementQuantity() {
+        int q = getIntItemQuantity();
+        int incrementQuantity = q < 100 ? q + 1 : 100;
+        return convertToString(incrementQuantity);
+    }
+
     public JButton quantityMinusBtn() {
         JButton button = getButton("-", 365, 50, 40, 10);
         button.addActionListener(e -> quantity.setText(decrementQuantity()));
         return button;
-    }
-
-    private String decrementQuantity() {
-        return convertToString(getIntItemQuantity() - 1);
-    }
-
-    private String incrementQuantity() {
-        return convertToString(getIntItemQuantity() + 1);
-    }
-
-    private String convertToString(int i) {
-        return String.valueOf(i);
     }
 
     private static JButton getButton(String text, int x, int y, int width, int textSize) {
@@ -79,6 +74,16 @@ public class ShoppingListUiComponent {
         saveBtn.setBounds(x, y, width, HEIGHT);
         saveBtn.setFont(new Font("Arial", Font.PLAIN, textSize));
         return saveBtn;
+    }
+
+    private String decrementQuantity() {
+        int q = getIntItemQuantity();
+        int decrementQuantity = q > 0 ? q - 1 : 0;
+        return convertToString(decrementQuantity);
+    }
+
+    private String convertToString(int i) {
+        return String.valueOf(i);
     }
 
     public String getItemName() {
@@ -105,4 +110,52 @@ public class ShoppingListUiComponent {
         quantity.setText(text);
     }
 
+    boolean isDeleteBtn(JButton btn) {
+        return btn.getText().equals("X");
+    }
+
+    boolean isThisComponentBtn(Component component) {
+        return component instanceof JButton;
+    }
+
+    boolean isValidItem() {
+        boolean isValidItem = true;
+        if (isItemNameNullOrEmpty(getItemName()) || isWhiteSpace())
+            isValidItem = notValidItem(Message.FAIL_ITEM_NAME);
+        else if (isItemQuantityBetween1And100())
+            isValidItem = notValidItem(Message.FAIL_ITEM_QUANTITY);
+
+        return isValidItem;
+    }
+
+    private boolean notValidItem(String failMessage) {
+        setFailMessage(failMessage);
+        return false;
+    }
+
+    boolean isItemNameNullOrEmpty(String itemName) {
+        return itemName == null || itemName.isEmpty();
+    }
+
+    boolean isWhiteSpace() {
+        return getItemName().matches("^\\s*$");
+    }
+
+    boolean isItemQuantityBetween1And100() {
+        int quantity = getIntItemQuantity();
+        return quantity < 1 || quantity > 100;
+    }
+
+    private void setFailMessage(String failMessage) {
+        errorMessage = failMessage;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    void clearItemsInput() {
+        setInputName("");
+        setInputQuantity("0");
+    }
 }

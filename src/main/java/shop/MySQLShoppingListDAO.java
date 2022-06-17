@@ -65,8 +65,8 @@ public class MySQLShoppingListDAO implements ShoppingListDAO {
     public void saveItems(List<Item> items) {
         try (final Connection con = getConnection(host, user, pass);
              final PreparedStatement insert = con.prepareStatement(INSERT_SQL)) {
-
             truncateItems();
+
             for (Item item : items) {
                 insert.setString(1, item.getName());
                 insert.setInt(2, item.getQuantity());
@@ -77,7 +77,7 @@ public class MySQLShoppingListDAO implements ShoppingListDAO {
         }
     }
 
-    public void truncateItems() {
+    private void truncateItems() {
         try (final Connection con = getConnection(host, user, pass);
              final PreparedStatement truncate = con.prepareStatement(TRUNCATE_SQL);) {
             truncate.executeUpdate();
