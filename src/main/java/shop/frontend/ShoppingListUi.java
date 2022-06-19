@@ -38,7 +38,7 @@ public class ShoppingListUi {
         addComponentsToPage(components);
     }
 
-    public void addComponentsToPage(Component[] components) {
+    private void addComponentsToPage(Component[] components) {
         for (Component component : components)
             addComponentToPage(component);
     }
@@ -151,7 +151,7 @@ public class ShoppingListUi {
                 removeComponent(component);
     }
 
-    public void removeComponent(Component component) {
+    private void removeComponent(Component component) {
         shoppingListPage.getContentPane().remove(component);
         shoppingListPage.repaint();
         shoppingListPage.revalidate();
@@ -211,7 +211,7 @@ public class ShoppingListUi {
         return saveBtn;
     }
 
-    public void saveItems() {
+    private void saveItems() {
         try {
             shopService.saveItems(getItems());
             throwAlert(Alert.success(Message.SAVED_SUCCESSFULLY));
