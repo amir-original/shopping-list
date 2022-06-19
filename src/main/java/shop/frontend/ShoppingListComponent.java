@@ -86,10 +86,6 @@ public class ShoppingListComponent {
         return String.valueOf(i);
     }
 
-    public String getItemName() {
-        return name.getText();
-    }
-
     public String getItemQuantity() {
         return quantity.getText();
     }
@@ -128,17 +124,21 @@ public class ShoppingListComponent {
         return isValidItem;
     }
 
-    private boolean notValidItem(String failMessage) {
-        setFailMessage(failMessage);
-        return false;
-    }
-
     boolean isItemNameNullOrEmpty(String itemName) {
         return itemName == null || itemName.isEmpty();
     }
 
+    public String getItemName() {
+        return name.getText();
+    }
+
     boolean isWhiteSpace() {
         return getItemName().matches("^\\s*$");
+    }
+
+    private boolean notValidItem(String failMessage) {
+        setFailMessage(failMessage);
+        return false;
     }
 
     boolean isItemQuantityBetween1And100() {
@@ -154,7 +154,7 @@ public class ShoppingListComponent {
         return errorMessage;
     }
 
-    void clearItemsInput() {
+    public void clearItemsInput() {
         setInputName("");
         setInputQuantity("0");
     }
