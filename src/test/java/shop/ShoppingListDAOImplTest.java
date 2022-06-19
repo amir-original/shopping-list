@@ -28,7 +28,7 @@ public class ShoppingListDAOImplTest {
 
     @BeforeEach
     void setUp() {
-        try( FileInputStream configFile = new FileInputStream("db-config.properties")) {
+        try (FileInputStream configFile = new FileInputStream("db-config.properties")) {
             Properties properties = new Properties();
             properties.load(configFile);
             host = properties.get("host").toString();
@@ -41,7 +41,7 @@ public class ShoppingListDAOImplTest {
 
     @Test
     void should_connect_to_mysql_database() {
-        try(final Connection con = getConnection(host, user, pass)) {
+        try (final Connection con = getConnection(host, user, pass)) {
             if (con == null)
                 fail(ERROR);
 
@@ -53,19 +53,18 @@ public class ShoppingListDAOImplTest {
 
     @Test
     void should_insert_and_read_and_delete_an_item_into_item_table() {
-        try(final Connection con = getConnection(host, user, pass);
-            final PreparedStatement insert = con.prepareStatement(INSERT_SQL);
-            final PreparedStatement select = con.prepareStatement(SELECT_SQL);
-            final PreparedStatement delete = con.prepareStatement(DELETE_SQL)) {
-           insert.setString(1,"Orange");
-           insert.setInt(2,5);
-           insert.executeUpdate();
+        try (final Connection con = getConnection(host, user, pass);
+             final PreparedStatement insert = con.prepareStatement(INSERT_SQL);
+             final PreparedStatement select = con.prepareStatement(SELECT_SQL);
+             final PreparedStatement delete = con.prepareStatement(DELETE_SQL)) {
+            insert.setString(1, "Orange");
+            insert.setInt(2, 5);
+            insert.executeUpdate();
 
             final ResultSet res = select.executeQuery();
             while (res.next()) {
-                final String name = res.getString("name");
+                final String name =  res.getString("name");
                 final int quantity = res.getInt("quantity");
-
                 assertThat(name).isEqualTo("Orange");
                 assertThat(quantity).isEqualTo(5);
             }
@@ -76,4 +75,5 @@ public class ShoppingListDAOImplTest {
             fail(ERROR);
         }
     }
+
 }

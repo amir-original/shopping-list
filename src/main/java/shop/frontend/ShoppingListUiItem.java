@@ -2,7 +2,7 @@ package shop.frontend;
 
 import javax.swing.*;
 
-public class UiItem {
+public class ShoppingListUiItem {
 
     private static final int TEXT_WIDTH = 300;
     private static final int HEIGHT = 50;
@@ -14,7 +14,7 @@ public class UiItem {
     private JTextField quantityComponent;
 
 
-    public UiItem(String name, String quantity, int topMargin) {
+    public ShoppingListUiItem(String name, String quantity, int topMargin) {
         this.name = name;
         this.quantity = quantity;
         this.topMargin = topMargin;
