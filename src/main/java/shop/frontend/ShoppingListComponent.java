@@ -20,6 +20,18 @@ public class ShoppingListComponent {
         return quantity;
     }
 
+    public static JTextField getjTextField(int x, int y, int width) {
+        JTextField jTextField = new JTextField();
+        jTextField.setBounds(x, y, width, HEIGHT);
+        jTextField.setEditable(true);
+        return jTextField;
+    }
+
+    private static void itemQuantityNumberInputConfig(JTextField itemQuantity) {
+        itemQuantity.setText("0");
+        itemQuantity.setHorizontalAlignment(JTextField.CENTER);
+    }
+
     public JButton deleteBtn(int topMargin) {
         JButton button = getButton("X", 500, topMargin, 50, 15);
         deleteBtnUiConfig(button);
@@ -37,18 +49,6 @@ public class ShoppingListComponent {
 
     public JButton saveBtn() {
         return getButton("Save", 100, 120, 150, 15);
-    }
-
-    public static JTextField getjTextField(int x, int y, int width) {
-        JTextField jTextField = new JTextField();
-        jTextField.setBounds(x, y, width, HEIGHT);
-        jTextField.setEditable(true);
-        return jTextField;
-    }
-
-    private static void itemQuantityNumberInputConfig(JTextField itemQuantity) {
-        itemQuantity.setText("0");
-        itemQuantity.setHorizontalAlignment(JTextField.CENTER);
     }
 
     public JButton quantityPlusBtn() {
@@ -106,14 +106,6 @@ public class ShoppingListComponent {
         quantity.setText(text);
     }
 
-    boolean isDeleteBtn(JButton btn) {
-        return btn.getText().equals("X");
-    }
-
-    boolean isThisComponentBtn(Component component) {
-        return component instanceof JButton;
-    }
-
     boolean isValidItem() {
         boolean isValidItem = true;
         if (isItemNameNullOrEmpty(getItemName()) || isWhiteSpace())
@@ -136,14 +128,14 @@ public class ShoppingListComponent {
         return getItemName().matches("^\\s*$");
     }
 
-    private boolean notValidItem(String failMessage) {
-        setFailMessage(failMessage);
-        return false;
-    }
-
     boolean isItemQuantityBetween1And100() {
         int quantity = getIntItemQuantity();
         return quantity < 1 || quantity > 100;
+    }
+
+    private boolean notValidItem(String failMessage) {
+        setFailMessage(failMessage);
+        return false;
     }
 
     private void setFailMessage(String failMessage) {
@@ -157,5 +149,19 @@ public class ShoppingListComponent {
     public void clearItemsInput() {
         setInputName("");
         setInputQuantity("0");
+    }
+
+    public boolean isDeleteBtn(Component component) {
+        if (isThisComponentBtn(component))
+            return isDeleteBtn((JButton) component);
+        return false;
+    }
+
+    private boolean isThisComponentBtn(Component component) {
+        return component instanceof JButton;
+    }
+
+    private boolean isDeleteBtn(JButton btn) {
+        return btn.getText().equals("X");
     }
 }

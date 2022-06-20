@@ -4,180 +4,123 @@ import shop.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedList;
 import java.util.List;
 
 public class ShoppingListUi {
 
-    private JFrame shoppingListPage;
+    ShoppingListPage shoppingListPage;
     private ShoppingListComponent uiComponent;
     private ShoppingListService shopService;
-    private List<ShoppingListUiItem> shoppingListItems;
-    private Component alertBox;
-    private int itemCount = 0;
+    private ShoppingListItems shoppingListItems;
 
     public static void main(String[] args) {
         ShoppingListUi ui = new ShoppingListUi();
         ui.setUp();
         ui.loadComponentsToPage();
-        ui.initConfigShoppingListPage();
-        ui.findAllItems();
+        ui.putTheSavedItemsOnPage();
     }
 
     private void setUp() {
-        shoppingListPage = new JFrame();
+        shoppingListPage = new ShoppingListPage("ShoppingList", 600, 600);
+        shoppingListPage.generate();
         uiComponent = new ShoppingListComponent();
         shopService = new ShoppingListServiceImpl(new MySQLShoppingListDAO());
-        shoppingListItems = new LinkedList<>();
+        shoppingListItems = new ShoppingListItems();
     }
 
     private void loadComponentsToPage() {
         Component[] components = {uiComponent.nameInput(), uiComponent.quantityPlusBtn(),
                 uiComponent.quantityInput(), uiComponent.quantityMinusBtn(), addItemBtn(), saveBtn()};
 
-        addComponentsToPage(components);
+        shoppingListPage.addComponents(components);
     }
 
-    public void addComponentsToPage(Component[] components) {
-        for (Component component : components)
-            addComponentToPage(component);
+    private void putTheSavedItemsOnPage() {
+        putTheSavedItemsOnPage(shopService.findAllItems());
     }
 
-    private void addComponentToPage(Component component) {
-        shoppingListPage.add(component);
-        shoppingListPage.repaint();
-    }
-
-    private void initConfigShoppingListPage() {
-        shoppingListPage.setTitle("Shopping List");
-        shoppingListPage.setSize(600, 600);
-        shoppingListPage.setLayout(null);
-        shoppingListPage.setVisible(true);
-    }
-
-    private void findAllItems() {
-        putAllItemsOnPage(shopService.findAllItems());
-    }
-
-    private void putAllItemsOnPage(List<Item> items) {
+    private void putTheSavedItemsOnPage(List<Item> items) {
         for (Item item : items)
-            putItemOnPage(item.getName(),item.getStrQuantity());
+            putItemOnPage(item.getName(), item.getStrQuantity());
     }
 
     private void putItemOnPage(String itemName, String itemQuantity) {
-        incrementItemCount();
-        ShoppingListUiItem uiItem = createUiItemComponent(itemName, itemQuantity);
+        shoppingListItems.incrementItemCount();
+        UiItem uiItem = createUiItemComponent(itemName, itemQuantity);
         refreshPageItemsWith(uiItem);
     }
 
-    private void incrementItemCount() {
-        itemCount++;
+    private UiItem createUiItemComponent(String name, String quantity) {
+        return new UiItem(name, quantity, getItemCount());
     }
 
-    private ShoppingListUiItem createUiItemComponent(String name, String quantity) {
-        return new ShoppingListUiItem(name, quantity, getTopMargin());
-    }
-
-    private void refreshPageItemsWith(ShoppingListUiItem uiItem) {
-        addItemToShoppingListItems(uiItem);
+    private void refreshPageItemsWith(UiItem uiItem) {
+        shoppingListItems.add(uiItem);
         addItemsToPage();
     }
 
-    private void addItemToShoppingListItems(ShoppingListUiItem itemUi) {
-        shoppingListItems.add(itemUi);
-    }
-
     private void addItemsToPage() {
-        for (ShoppingListUiItem item : shoppingListItems) {
-            addItemToShoppingList(item);
+        for (UiItem item : shoppingListItems.getUiItems()) {
+            shoppingListPage.addUiItem(item);
             attachDeleteBtnToItem(item);
         }
     }
 
-    private void addItemToShoppingList(ShoppingListUiItem item) {
-        addComponentToPage(item.getNameComponent());
-        addComponentToPage(item.getQuantityComponent());
+    private void attachDeleteBtnToItem(UiItem item) {
+        shoppingListPage.addComponent(deleteBtn(item));
     }
 
-    private void attachDeleteBtnToItem(ShoppingListUiItem item) {
-        addComponentToPage(deleteBtn(item));
-    }
-
-    private JButton deleteBtn(ShoppingListUiItem item) {
+    private JButton deleteBtn(UiItem item) {
         JButton button = uiComponent.deleteBtn(item.getTopMargin());
-        addActionToDeleteBtn(button,item);
+        addActionToDeleteBtn(button, item);
         return button;
     }
 
-    private void addActionToDeleteBtn(JButton button,ShoppingListUiItem item) {
+    private void addActionToDeleteBtn(JButton button, UiItem item) {
         button.addActionListener(e1 -> {
             shoppingListItems.remove(item);
-            removeItemOfShoppingListPage(item);
+            shoppingListPage.removeUiItem(item);
             refreshPage();
         });
     }
 
-    private void removeItemOfShoppingListPage(ShoppingListUiItem item) {
-        removeComponent(item.getQuantityComponent());
-        removeComponent(item.getNameComponent());
-    }
-
     private void refreshPage() {
-        clearItemCount();
-        removeAllElements();
+        shoppingListItems.clearItemCount();
+        removeResults();
     }
 
-    private void clearItemCount() {
-        itemCount = 0;
-    }
-
-    private void removeAllElements() {
+    private void removeResults() {
         removeAllDeleteBtn();
         refreshAllItems();
     }
 
     private void removeAllDeleteBtn() {
-        for (Component component : getAllComponents())
+        for (Component component : shoppingListPage.getAllComponents())
             removeDeleteBtn(component);
     }
 
-    private Component[] getAllComponents() {
-        return shoppingListPage.getContentPane().getComponents();
-    }
-
-    private void removeDeleteBtn(Component component) {
-        if (uiComponent.isThisComponentBtn(component))
-            if (uiComponent.isDeleteBtn((JButton) component))
-                removeComponent(component);
-    }
-
-    public void removeComponent(Component component) {
-        shoppingListPage.getContentPane().remove(component);
-        shoppingListPage.repaint();
-        shoppingListPage.revalidate();
+    void removeDeleteBtn(Component component) {
+        if (uiComponent.isDeleteBtn(component))
+            shoppingListPage.removeComponent(component);
     }
 
     private void refreshAllItems() {
-        for (ShoppingListUiItem shoppingListItem : shoppingListItems) {
-            removeItemOfShoppingListPage(shoppingListItem);
-            refreshShoppingListPage(shoppingListItem);
+        for (UiItem uiItem : shoppingListItems.getUiItems()) {
+            shoppingListPage.removeUiItem(uiItem);
+            refreshShoppingListPage(uiItem);
         }
     }
 
-    private void refreshShoppingListPage(ShoppingListUiItem shoppingListItem) {
-        incrementItemCount();
-        ShoppingListUiItem newItem = createUiItemComponent(shoppingListItem.getName(), shoppingListItem.getStrQuantity());
+    private void refreshShoppingListPage(UiItem shoppingListItem) {
+        shoppingListItems.incrementItemCount();
+        UiItem newItem = createUiItemComponent(shoppingListItem.getName(), shoppingListItem.getStrQuantity());
         addOneItemToPage(newItem);
-        updateShoppingListItem(shoppingListItem, newItem);
+        shoppingListItems.update(shoppingListItem, newItem);
     }
 
-    private void addOneItemToPage(ShoppingListUiItem itemUi) {
-        addItemToShoppingList(itemUi);
+    private void addOneItemToPage(UiItem itemUi) {
+        shoppingListPage.addUiItem(itemUi);
         attachDeleteBtnToItem(itemUi);
-    }
-
-    private void updateShoppingListItem(ShoppingListUiItem src, ShoppingListUiItem dst) {
-        shoppingListItems.set(shoppingListItems.indexOf(src), dst);
     }
 
     private JButton addItemBtn() {
@@ -189,19 +132,19 @@ public class ShoppingListUi {
     private void addItemBtnAction(JButton addBtn) {
         addBtn.addActionListener(e -> {
             if (!uiComponent.isValidItem())
-                throwAlert(Alert.error(uiComponent.getErrorMessage()));
+                shoppingListPage.throwAlert(Alert.error(uiComponent.getErrorMessage()));
             else
                 refreshPageWhenClickAddBtn();
         });
     }
 
     private void refreshPageWhenClickAddBtn() {
-        putItemOnPage(uiComponent.getItemName(),uiComponent.getItemQuantity());
+        putItemOnPage(uiComponent.getItemName(), uiComponent.getItemQuantity());
         clearAlertAndItemsInput();
     }
 
     private void clearAlertAndItemsInput() {
-        clearAlert();
+        shoppingListPage.clearAlert();
         uiComponent.clearItemsInput();
     }
 
@@ -211,51 +154,18 @@ public class ShoppingListUi {
         return saveBtn;
     }
 
-    public void saveItems() {
+    private void saveItems() {
+        Component alertBox = Alert.success(Message.SAVED_SUCCESSFULLY);
         try {
-            shopService.saveItems(getItems());
-            throwAlert(Alert.success(Message.SAVED_SUCCESSFULLY));
+            shopService.saveItems(shoppingListItems.getItems());
         } catch (ItemNameException | ItemQuantityException e) {
-            throwAlert(Alert.error(e.getMessage()));
+            alertBox = Alert.error(e.getMessage());
+        } finally {
+            shoppingListPage.throwAlert(alertBox);
         }
     }
 
-    private List<Item> getItems() {
-        List<Item> items = new LinkedList<>();
-        for (ShoppingListUiItem uiItem : shoppingListItems)
-            items.add(new Item(uiItem.getName(), uiItem.getQuantity()));
-
-        return items;
+    private int getItemCount() {
+        return shoppingListItems.getItemCount();
     }
-
-    private int getTopMargin() {
-        return isFirstItem() ? 185 : computeTopMargin();
-    }
-
-    private int computeTopMargin() {
-        return 130 + (55 * itemCount);
-    }
-
-    private boolean isFirstItem() {
-        return itemCount == 1;
-    }
-
-    private void throwAlert(Component alert) {
-        clearAlert();
-        alertBox = alert;
-        addComponentToPage(alert);
-    }
-
-    private void clearAlert() {
-        if (isAlertBoxNotEmpty())
-            removeComponent(alertBox);
-    }
-
-    private boolean isAlertBoxNotEmpty() {
-        return !isAlertBoxEmpty();
-    }
-
-    private boolean isAlertBoxEmpty() {
-        return alertBox == null;
-    }
-} 
+}

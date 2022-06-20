@@ -2,22 +2,22 @@ package shop.frontend;
 
 import javax.swing.*;
 
-public class ShoppingListUiItem {
+public class UiItem {
 
     private static final int TEXT_WIDTH = 300;
     private static final int HEIGHT = 50;
     private static final int QUANTITY_WIDTH = 65;
     private final String name;
     private final String quantity;
-    private final int topMargin;
+    private final int itemCount;
     private JTextField nameComponent;
     private JTextField quantityComponent;
 
 
-    public ShoppingListUiItem(String name, String quantity, int topMargin) {
+    public UiItem(String name, String quantity, int itemCount) {
         this.name = name;
         this.quantity = quantity;
-        this.topMargin = topMargin;
+        this.itemCount = itemCount;
         createItemComponent();
     }
 
@@ -36,7 +36,7 @@ public class ShoppingListUiItem {
 
     public JTextField createJText(int marginLeft, String text, int width, int textAlign) {
         JTextField jTextField = new JTextField();
-        jTextField.setBounds(marginLeft, topMargin, width, HEIGHT);
+        jTextField.setBounds(marginLeft, getTopMargin(), width, HEIGHT);
         jTextFieldConfig(textAlign, jTextField);
         jTextField.setText(text);
         return jTextField;
@@ -68,6 +68,15 @@ public class ShoppingListUiItem {
     }
 
     public int getTopMargin() {
-        return topMargin;
+        return isFirstItem() ? 185 : computeTopMargin();
     }
+
+    private int computeTopMargin() {
+        return 130 + (55 * itemCount);
+    }
+
+    private boolean isFirstItem() {
+        return itemCount == 1;
+    }
+
 }
